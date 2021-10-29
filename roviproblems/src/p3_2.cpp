@@ -11,12 +11,9 @@
 // rovi includes
 #include "../includes/p3_2.hpp"
 
-void reachabilityAnalysis()
-{
-    std::cout << "Q works" << std::endl;
-    rw::math::Q q_vec(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    std::cout << q_vec << std::endl;
-}
+
+USE_ROBWORK_NAMESPACE
+using namespace robwork;
 
 std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std::string nameTcp, rw::models::SerialDevice::Ptr robot, rw::models::WorkCell::Ptr wc, rw::kinematics::State state)
 {
@@ -40,17 +37,17 @@ std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std
     }
 
     // Make "helper" transformations
-    rw::math::Transform3D<> frameBaseTGoal = rw::kinematics::Kinematics::frameTframe(frameRobotBase, frameGoal, state);
-    rw::math::Transform3D<> frameTcpTRobotTcp = rw::kinematics::Kinematics::frameTframe(frameTcp, frameRobotTcp, state);
+    rw::math::Transform3D<> frameBaseTGoal = rw::kinematics::Kinematics::frameTframe(frameRobotBase, frameGoal, state); //Robot base frame to target object frame
+    rw::math::Transform3D<> frameTcpTRobotTcp = rw::kinematics::Kinematics::frameTframe(frameTcp, frameRobotTcp, state); //GraspTCP frame to robotTCP frame
 
     // get grasp frame in robot tool frame
-    rw::math::Transform3D<> targetAt = frameBaseTGoal * frameTcpTRobotTcp;
+    rw::math::Transform3D<> targetAt = frameBaseTGoal * frameTcpTRobotTcp; //Put GraspTCP reference frame center at object frame center
 
     rw::invkin::ClosedFormIKSolverUR::Ptr closedFormSovler = rw::common::ownedPtr( new rw::invkin::ClosedFormIKSolverUR(robot, state) );
     return closedFormSovler->solve(targetAt, state);
 }
 
-/*
+
 void reachabilityAnalysis()
 {
     
@@ -58,20 +55,34 @@ void reachabilityAnalysis()
         rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
         if(NULL == wc){
             RW_THROW("COULD NOT LOAD scene... check path!");
-            return -1;
         }
 
         // find relevant frames
         rw::kinematics::MovableFrame::Ptr cylinderFrame = wc->findFrame<rw::kinematics::MovableFrame>("Cylinder");
         if(NULL == cylinderFrame){
             RW_THROW("COULD not find movable frame Cylinder ... check model");
-            return -1;
         }
+
+        rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Bottle");
+        if(NULL == bottleFrame){
+            RW_THROW("COULD not find movable frame Bottle ... check model");
+        }
+    
+        rw::kinematics::MovableFrame::Ptr squareFrame = wc->findFrame<rw::kinematics::MovableFrame>("Square");
+        if(NULL == squareFrame){
+            RW_THROW("COULD not find movable frame Square ... check model");
+        }
+
         // find UR device
-        rw::models::SerialDevice::Ptr robotUR5 = wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
-        if(NULL == robotUR5){
+        rw::models::SerialDevice::Ptr robotUR685A = wc->findDevice<rw::models::SerialDevice>("UR-6-85-5-A");
+        if(NULL == robotUR685A){
             RW_THROW("COULD not find device UR-6-85-5-A ... check model");
-            return -1;
+        }
+
+        // find WSG device
+        rw::models::TreeDevice::Ptr wsg50 = wc->findDevice<rw::models::TreeDevice>("WSG50");
+        if(NULL == wsg50){
+            RW_THROW("COULD not find device WSG50 ... check model");
         }
         
         
@@ -87,23 +98,27 @@ void reachabilityAnalysis()
         // Use the function MoveTo to move the manipulator, 
         // record the state
 
+        std::string toolTCP = wsg50->getName() + "." + "TCP";
+        std::cout << "toolTCP: " << toolTCP << std::endl;
+
         for (double rollAngle = 0.0; rollAngle <= 360.0; rollAngle += 1.0)
         {
 
             // First set the cylinderFrame
-            rw::math::Vector3D<> t(cylinderFrame->getTransform(state).P());
+            rw::math::Vector3D<> t(bottleFrame->getTransform(state).P());
             rw::math::RPY<> R(rollAngle*rw::math::Deg2Rad,0,0);
-            rw::math::Transform3D<> newCylinderTransform(t, R);
-            cylinderFrame->moveTo(newCylinderTransform, state);
+            rw::math::Transform3D<> newBottleTransform(t, R);
+            bottleFrame->moveTo(newBottleTransform, state);
 
-            std::vector<rw::math::Q> solutions = getConfigurations("Bottle", "GraspTCP", robotUR5, wc, state);
+            
+            std::vector<rw::math::Q> solutions = getConfigurations("Bottle", toolTCP, robotUR685A, wc, state);
 
             // loop and check the solutions if there is a colision 
             for (int i = 0; i < solutions.size(); i++)
             {
                 // Set the robot in i'th configuration ("q") from the found solutions
                 // and see if there is a collision
-                robotUR5->setQ(solutions[i], state);
+                robotUR685A->setQ(solutions[i], state);
                 if( !detector->inCollision(state,NULL,true) ){
                     collisionFreeSolutions.push_back(solutions[i]); // save it
                     break; // we only need one
@@ -120,14 +135,11 @@ void reachabilityAnalysis()
         TimedStatePath tStatePath;
         double time=0;
         for(unsigned int i=0; i<collisionFreeSolutions.size(); i++){
-            robotUR5->setQ(collisionFreeSolutions[i], state);
+            robotUR685A->setQ(collisionFreeSolutions[i], state);
             tStatePath.push_back(TimedState(time,state));
             time+=0.01;
         }
 
         rw::loaders::PathLoader::storeTimedStatePath(*wc, tStatePath, "../experiment_data/p3_2/visu.rwplay");
 
-    }
-
 }
-*/

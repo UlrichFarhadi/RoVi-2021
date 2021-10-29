@@ -42,7 +42,7 @@
   <!--####################################################-->
 
   <Frame name="TCP" refframe="Base" type="EndEffector">
-    <RPY>0 0 0</RPY> <Pos>0 0 0.0985</Pos>
+    <RPY>0 0 0</RPY> <Pos>0 0 0.0785</Pos>
   </Frame>
 
 
@@ -101,6 +101,6 @@
   <!-- collision setup -->
   <CollisionSetup file ="GripperCollisionSetup.xml"/>
 
-  <Q name="Home">0.025</Q>	
+  <Q name="Home">0.055</Q>	
 
 </TreeDevice>
