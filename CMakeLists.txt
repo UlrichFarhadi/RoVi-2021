@@ -11,7 +11,7 @@ enable_testing()
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Use c++11
-# SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+SET(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 # Set the RobWork root (edit in .bashrc if necessary)
 SET(RW_ROOT $ENV{RW_ROOT})
@@ -25,12 +25,13 @@ MESSAGE("-- Build type: " ${CMAKE_BUILD_TYPE})
 
 # Use RobWorks
 SET(RobWork_DIR ${RW_ROOT}/cmake) 
-FIND_PACKAGE(RobWork REQUIRED HINTS /home/ulrich/RobWork)
+#FIND_PACKAGE(RobWork REQUIRED HINTS /home/ulrich/RobWork)
+FIND_PACKAGE(RobWork REQUIRED HINTS ~/RobWork)
 INCLUDE_DIRECTORIES( ${ROBWORK_INCLUDE_DIRS} )
 LINK_DIRECTORIES( ${ROBWORK_LIBRARY_DIRS} )
 
 # Add the source files to build'
-SET(SrcFiles main.cpp roviproblems/src/p3_2.cpp)
+SET(SrcFiles main.cpp roviproblems/src/p3_2.cpp roviproblems/src/p3_3.cpp)
 
 
 

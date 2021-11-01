@@ -6,3 +6,10 @@ build:
 
 run:
 /home/thobias/Documents/MSc1/RoVi-2021/build/rovi2021
+
+
+BEFORE RUNNING
+Check CMakeLists.txt and ensure that the path FIND_PACKAGE(RobWork REQUIRED HINTS /home/ulrich/RobWork) is set
+correctly for your current setup.
+
+Ensure that the main.cpp file is running the function you intend to test.

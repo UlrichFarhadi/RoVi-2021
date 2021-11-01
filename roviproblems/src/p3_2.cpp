@@ -50,8 +50,10 @@ std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std
 
 void reachabilityAnalysis()
 {
+    std::cout << "Running reachability analysis..." << std::endl;
     
         //load workcell
+        std::cout << "Loading workcell..." << std::endl;
         rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
         if(NULL == wc){
             RW_THROW("COULD NOT LOAD scene... check path!");
