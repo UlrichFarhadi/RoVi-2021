@@ -1,7 +1,7 @@
 <WorkCell name="Scene">
 
 	<Frame name="Table" refframe="WORLD" type="Fixed">
-		<RPY>0 0 0</RPY> <Pos>0 0 -0.1</Pos>		
+		<RPY>0 0 0</RPY> <Pos>0 0 0</Pos>		
 		 <Drawable name="Table" refframe="Table">
          <Polytope file="table/Sigmund_table" />
      </Drawable>
@@ -28,6 +28,19 @@
      </Drawable>
 </Frame>
 
+	<Frame name = "GraspTargetTop" refframe="Bottle" type="Fixed">
+	<RPY>0 0 90</RPY> <Pos>0 0.030 0</Pos>
+	</Frame>
+<!--
+	<Frame name="PlaceBottle" refframe="Table"  type="Movable" daf="true" >
+     <RPY> -90 0 90 </RPY> <Pos> 0.285 -0.490 0.21 </Pos>
+	 <Drawable name="PlaceBottle" refframe="PlaceBottle">
+         <Polytope file="parts/bottle" />
+     </Drawable>
+</Frame>
+-->
+
+<!--
 	<Frame name="Square" refframe="Table"  type="Movable" daf="true" >
      <RPY> -90 0 90 </RPY> <Pos> 0.25 0.474 0.150</Pos>
      <Drawable name="Square" refframe="Square">
@@ -41,6 +54,8 @@
          <Polytope file="parts/cylinder" />
      </Drawable>
 </Frame>
+-->
+
 
 <!-- Cameras -->
 
