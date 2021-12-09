@@ -7,6 +7,7 @@
 int main(int argc, char** argv)
 {
 <<<<<<< HEAD
+    reachabilityAnalysis();
     pick_n_place_analysis();
 =======
     simulateCollisionLandscape(20);
