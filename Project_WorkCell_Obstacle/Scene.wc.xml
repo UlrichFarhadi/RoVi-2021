@@ -1,0 +1,97 @@
+<WorkCell name="Scene">
+
+	<Frame name="Table" refframe="WORLD" type="Fixed">
+		<RPY>0 0 0</RPY> <Pos>0 0 -0.1</Pos>		
+		 <Drawable name="Table" refframe="Table">
+         <Polytope file="table/Sigmund_table" />
+     </Drawable>
+	</Frame>
+
+	<Frame name="URReference" refframe="Table" type="Movable">
+		<RPY>0 0 0</RPY> <Pos>0.1 -0.04 0.11</Pos>
+	</Frame>
+	<Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
+
+	<Frame name="Place_Target" refframe="WORLD" type="Movable">
+		<RPY>0 0 90</RPY> <Pos>0.285 -0.490 0.110</Pos>
+	</Frame>
+	
+<!--insert gripper definition-->
+	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
+		<RPY>0 0 0</RPY> <Pos>0 0 0.075</Pos>
+	</Frame>
+	<Include file="wsg50/wsg50.xml" />
+	
+	<Frame name="Bottle" refframe="Table"  type="Movable" daf="true" >
+     <RPY> -90 0 90 </RPY> <Pos> 0 0.474 0.21 </Pos>
+     <Drawable name="Bottle" refframe="Bottle">
+         <Polytope file="parts/bottle" />
+     </Drawable>
+</Frame>
+<!--
+	<Frame name="Square" refframe="Table"  type="Movable" daf="true" >
+     <RPY> -90 0 90 </RPY> <Pos> 0.25 0.474 0.150</Pos>
+     <Drawable name="Square" refframe="Square">
+         <Polytope file="parts/square" />
+     </Drawable>
+</Frame>
+
+	<Frame name="Cylinder" refframe="Table"  type="Movable" daf="true" >
+     <RPY> -90 0 90 </RPY> <Pos> -0.25 0.474 0.150 </Pos>
+     <Drawable name="Cylinder" refframe="Cylinder">
+         <Polytope file="parts/cylinder" />
+     </Drawable>
+</Frame>
+-->
+<!-- Obstacles -->
+
+<Frame name="Sphere" refframe="WORLD" type="Movable">
+	<RPY>0 0 0</RPY> <Pos>0.5 0 0.3</Pos>
+	<Drawable name="SphereGeo" refframe="Sphere" colmodel="Enabled">
+		<Sphere radius="0.3"/>
+	</Drawable>
+</Frame>
+
+<Frame name="Sphere1" refframe="WORLD" type="Movable">
+	<RPY>0 0 0</RPY> <Pos>-0.5 0 0.3</Pos>
+	<Drawable name="SphereGeo1" refframe="Sphere1" colmodel="Enabled">
+		<Sphere radius="0.3"/>
+	</Drawable>
+</Frame>
+
+<Frame name="Sphere2" refframe="WORLD" type="Movable">
+	<RPY>0 0 0</RPY> <Pos>0.5 0 0.9</Pos>
+	<Drawable name="SphereGeo" refframe="Sphere2" colmodel="Enabled">
+		<Sphere radius="0.3"/>
+	</Drawable>
+</Frame>
+
+<Frame name="Sphere3" refframe="WORLD" type="Movable">
+	<RPY>0 0 0</RPY> <Pos>-0.5 0 0.9</Pos>
+	<Drawable name="SphereGeo1" refframe="Sphere3" colmodel="Enabled">
+		<Sphere radius="0.3"/>
+	</Drawable>
+</Frame>
+
+<!-- Cameras -->
+
+<Frame name="Camera_Right" refframe="WORLD" type="Movable">
+	<Pos>0 1.033 1.325</Pos>
+	<RPY>0 0 -25</RPY>
+	<Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
+</Frame>
+<Frame name="Camera_Left" refframe="WORLD" type="Movable">
+	<Pos>0.2 1.033 1.325</Pos>
+	<RPY>0 0 -25</RPY>
+	<Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
+</Frame>
+
+<Frame name="Scanner25D" refframe="WORLD" type="Movable">
+	<Pos>0 1.033 1.325</Pos>
+	<RPY>0 0 -25</RPY>
+	<Property name="Scanner25D" desc="[fovy,width,height]">50 640 480</Property>
+</Frame>
+
+<CollisionSetup file="SceneCollisionSetup.prox.xml" /> 
+
+</WorkCell>

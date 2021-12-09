@@ -30,12 +30,11 @@ FIND_PACKAGE(RobWork REQUIRED HINTS ~/RobWork)
 INCLUDE_DIRECTORIES( ${ROBWORK_INCLUDE_DIRS} )
 LINK_DIRECTORIES( ${ROBWORK_LIBRARY_DIRS} )
 
+
 # Add the source files to build'
 SET(SrcFiles main.cpp roviproblems/src/p3_2.cpp roviproblems/src/p3_3.cpp)
 
 
-
-# The shared library to build:
 ADD_EXECUTABLE(${PROJECT_NAME} ${SrcFiles})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROBWORK_LIBRARIES})
 
