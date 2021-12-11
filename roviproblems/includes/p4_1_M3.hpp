@@ -1,1 +1,1 @@
-int test();
+int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::string filename);

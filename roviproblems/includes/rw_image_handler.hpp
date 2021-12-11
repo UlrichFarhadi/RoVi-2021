@@ -28,6 +28,72 @@ using rw::sensor::Image;
 using namespace rwlibs::simulation;
 using namespace rws;
 
+void addSaltAndPepperNoise(cv::Mat &image, double noise_percentage = 10)
+{
+    int image_rows = image.rows;
+    int image_columns = image.cols;
+    int image_channels = image.channels();
+    int noise_points = (int) (((double) image_rows*
+    image_columns*image_channels)*noise_percentage/100.0);
+    for (int count = 0; count < noise_points; count++)
+    {
+        int row = rand() % image_rows;
+        int column = rand() % image_columns;
+        int bw = rand() % 2;
+        cv::Vec3b & color = image.at<cv::Vec3b>(row,column);
+        if (bw == 0)
+        {
+            color[0] = 255;
+            color[1] = 255;
+            color[2] = 255;
+        }
+        else
+        {
+            color[0] = 0;
+            color[1] = 0;
+            color[2] = 0;
+        }
+        
+        //int channel = rand() % image_channels;
+        //uchar* pixel = image.ptr<uchar>(row) + (column*image_channels) + channel;
+        //*pixel = (rand()%2 == 1) ? 255 : 0;
+    }
+}
+
+
+void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr _wc, State _state) {
+    Frame* cameraFrame = _wc->findFrame(frameName);
+    if (cameraFrame != NULL) {
+        if (cameraFrame->getPropertyMap().has("Camera")) {
+            // Read the dimensions and field of view
+            double fovy;
+            int width,height;
+            std::string camParam = cameraFrame->getPropertyMap().get<std::string>("Camera");
+            std::istringstream iss (camParam, std::istringstream::in);
+            iss >> fovy >> width >> height;
+
+            double fovy_pixel = height / 2 / tan(fovy * (2*M_PI) / 360.0 / 2.0 );
+
+            Eigen::Matrix<double, 3, 4> KA;
+            KA << fovy_pixel, 0, width / 2.0, 0,
+                  0, fovy_pixel, height / 2.0, 0,
+                  0, 0, 1, 0;
+
+            std::cout << "Intrinsic parameters:" << std::endl;
+            std::cout << KA << std::endl;
+
+
+            rw::math::Transform3D<> camPosOGL = cameraFrame->wTf(_state);
+            rw::math::Transform3D<> openGLToVis = rw::math::Transform3D<>(rw::math::RPY<>(-1 * rw::math::Pi, 0, rw::math::Pi).toRotation3D());
+            rw::math::Transform3D<> H = inverse(camPosOGL * inverse(openGLToVis));
+
+            std::cout << "Extrinsic parameters:" << std::endl;
+            std::cout << H.e() << std::endl;
+
+        }
+    }
+}
+
 // Function to find feature in both images (2D point to be used for triangulation)
 std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::Mat image_left)
 {
@@ -57,7 +123,7 @@ std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::M
         {
             //std::cout << image_left.at<cv::Vec3b>(i,j) << std::endl;
             cv::Vec3b color = image_left.at<cv::Vec3b>(i,j);
-            if (color[0] <= 10 && color[1] <= 10 && color[2] >= 245)
+            if (color[0] <= 30 && color[1] <= 30 && color[2] >= 220)
             {
                 y_left.push_back(i);
                 x_left.push_back(j);
@@ -86,16 +152,16 @@ std::vector<std::vector<double>> triangulateFeatures(std::vector<std::vector<dou
     //cv::triangulatePoints();
 }
 
-void storeImages(cv::Mat &img_right, cv::Mat &img_left)
+void storeImages(cv::Mat &img_right, cv::Mat &img_left, std::string image_right, std::string image_left)
 {
     //getImageFromCameras();
-    cv::Mat img_right_file = cv::imread("ImageRight.ppm");
-    cv::Mat img_left_file = cv::imread("ImageLeft.ppm");
+    cv::Mat img_right_file = cv::imread(image_right);
+    cv::Mat img_left_file = cv::imread(image_left);
     img_right_file.cv::Mat::copyTo(img_right);
     img_left_file.cv::Mat::copyTo(img_left);
 }
 
-void getImageFromCameras()
+void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
 {
     {
     static const std::string WC_FILE = "../workcell/Scene.wc.xml";
@@ -122,15 +188,44 @@ void getImageFromCameras()
     //std::cout << "Camera properties: fov " << fovy << " width " << width << " height " << height
     //          << std::endl;
 
+    rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Bottle");
+    if(NULL == bottleFrame){
+        RW_THROW("COULD not find movable frame Bottle ... check model");
+    }
+
+    // Ditribution for different bottle spawning points
+    // Upper Left corner: x = 0.35, y = 0.36
+    // Upper right corner: x = -0.35, y = 0.53
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> dist_x(-0.35, 0.35);
+    std::uniform_real_distribution<double> dist_y(0.36, 0.53);
+
+    State state = wc->getDefaultState();
+    
     RobWorkStudioApp app ("");
     RWS_START (app)
     {
         RobWorkStudio* const rwstudio = app.getRobWorkStudio ();
-        rwstudio->postOpenWorkCell (WC_FILE);
+        //rwstudio->postOpenWorkCell (WC_FILE);
+        rwstudio->postWorkCell(wc);
+        //rwstudio->
+        rwstudio->setState(state);
         TimerUtil::sleepMs (5000);
-        for (int i = 0; i < 1; i++)
+
+        for (int i = 0; i < 20; i++)
         //while(1)
         {
+            double bottlepos_x = dist_x(generator);
+            double bottlepos_y = dist_y(generator);
+            std::vector<double> gt_pos = {bottlepos_x, bottlepos_y};
+            ground_truth.push_back(gt_pos);
+            //std::cout << i << " Current Bottle Pos" << bottlepos_x << " " << bottlepos_y << std::endl;
+            // Moving robot base:
+            rw::math::Vector3D<> bottle_T = rw::math::Vector3D<>(bottlepos_x, bottlepos_y, 0.21);
+            rw::math::RPY<> bottle_R(-90*rw::math::Deg2Rad, 0, 90*rw::math::Deg2Rad);
+            rw::math::Transform3D<> bottle_transform(bottle_T, bottle_R);
+            bottleFrame->moveTo(bottle_transform, state);
+            rwstudio->setState(state);
             {
             const SceneViewer::Ptr gldrawer = rwstudio->getView ()->getSceneViewer ();
             const GLFrameGrabber::Ptr framegrabber =
@@ -145,7 +240,7 @@ void getImageFromCameras()
 
             static const double DT = 0.001;
             const Simulator::UpdateInfo info (DT);
-            State state = wc->getDefaultState ();
+            //State state = wc->getDefaultState ();
             int cnt     = 0;
             const Image* img;
             while (!simcam->isImageReady ()) {
@@ -154,7 +249,8 @@ void getImageFromCameras()
                 cnt++;
             }
             img = simcam->getImage ();
-            img->saveAsPPM ("ImageRight.ppm");
+            std::string imgname_r = "ImageRight" + std::to_string(i) + ".ppm";
+            img->saveAsPPM (imgname_r);
             // simcam->acquire ();
             // while (!simcam->isImageReady ()) {
             //     std::cout << "Image is not ready yet. Iteration " << cnt << std::endl;
@@ -184,7 +280,7 @@ void getImageFromCameras()
 
             static const double DT = 0.001;
             const Simulator::UpdateInfo info (DT);
-            State state = wc->getDefaultState ();
+            //State state = wc->getDefaultState ();
             int cnt     = 0;
             const Image* img;
             while (!simcam->isImageReady ()) {
@@ -193,7 +289,8 @@ void getImageFromCameras()
                 cnt++;
             }
             img = simcam->getImage ();
-            img->saveAsPPM ("ImageLeft.ppm");
+            std::string imgname_l = "ImageLeft" + std::to_string(i) + ".ppm";
+            img->saveAsPPM (imgname_l);
             simcam->stop ();
             // REMEMBER TO SAVE THE GROUND TRUTH POSITION AS WELL
             }
