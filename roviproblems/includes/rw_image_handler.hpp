@@ -107,7 +107,7 @@ std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::M
         {
             //std::cout << image_right.at<cv::Vec3b>(i,j) << std::endl;
             cv::Vec3b color = image_right.at<cv::Vec3b>(i,j);
-            if (color[0] <= 10 && color[1] <= 10 && color[2] >= 245)
+            if (color[0] <= 70 && color[1] <= 70 && color[2] >= 150)
             {
                 y_right.push_back(i);
                 x_right.push_back(j);
