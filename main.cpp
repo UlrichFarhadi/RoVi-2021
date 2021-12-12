@@ -33,7 +33,7 @@ int main(int argc, char** argv)
     //simulateCollisionLandscape(20);
     //std::cout << reachabilityAnalysis_place(0, 0, false, true) << std::endl;
     std::cout << "main started" << std::endl;
-    //test();
+    test();
 
  
     //reachabilityAnalysis();  
