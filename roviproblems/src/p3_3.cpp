@@ -877,14 +877,14 @@ void pick_n_place_analysis()
         motion_planning_LIP(scene_path, robot_device_name, bottleFrame, path_points_no.first, path_points_no.second, map_no, bottlePos);
         std::cout << "---------------------------- PB bottle pos " << bottlePos << "----------------------------" << std::endl;
         motion_planning_PB(scene_path, robot_device_name, bottleFrame, path_points_no.first, path_points_no.second, map_no, bottlePos);
-        /*
+        
         for(int i = 1; i <= TRIAL_MAX; ++i)
         {
             std::cout << "---------------------------- RRT bottle pos " << bottlePos << " trial " << i << "----------------------------" << std::endl;
             int trial = 100 * bottlePos + i;
             motion_planning_RRT(scene_path_w_obstacles, robot_device_name, bottleFrame, map_wo, trial);
         }
-        */
+        
         
        std::cout << "---------------------------- Ending bottle ----------------------------" << std::endl;
        bottlePos += 1;
