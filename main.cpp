@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
     //test(0, 1, 0.0, "Gaussian_NoNoise");
     //test(20, 1, 0.0, "Gaussian_HighNoise");
-    //test(80, 1, 0.0, "Gaussian_VeryHighNoise");
+    test(80, 1, 0.0, "Gaussian_VeryHighNoise");
 
     //test(0, 2, 0.0, "saltpepper_NoNoise");
     //test(0, 2, 10.0, "saltpepper_HighNoise");
