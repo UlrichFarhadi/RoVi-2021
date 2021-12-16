@@ -26,7 +26,7 @@
 #include "../includes/rw_image_handler.hpp"
 
 
-int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::string filename) // Blur = 1, salt and pepper = 2
+int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename) // Blur = 1, salt and pepper = 2
 {
     
     std::vector<std::vector<double>> ground_truth;
@@ -39,6 +39,7 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
     std::ofstream datafile(filename_combined);
     for(int i = 0; i < 20; i++)
     {
+        std::cout << "Image: " << i << std::endl;
         cv::Mat right_image;
         cv::Mat left_image;
         std::string i_r_str = "ImageRight" + std::to_string(i) + ".ppm";
@@ -56,8 +57,8 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
 
         if(blur_or_saltpepper == 2)
         {
-            addSaltAndPepperNoise(right_image, percentage);
-            addSaltAndPepperNoise(left_image, percentage);
+            addSaltAndPepperNoise(right_image, salt_and_pepper_percentage);
+            addSaltAndPepperNoise(left_image, salt_and_pepper_percentage);
         }
 
         /*
@@ -75,7 +76,6 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
         cv::imshow("Right Blur", right_image_blur);
         cv::imshow("Left Blur", left_image_blur);
         */
-
         std::vector<std::vector<int>> RL_features = feature2DRightLeftImage(right_image, left_image);
         //std::cout << "Right x,y: " << RL_features[0][1] << "," << RL_features[0][0] << std::endl;
         //std::cout << "Left x,y: " << RL_features[1][1] << "," << RL_features[1][0] << std::endl;
@@ -83,7 +83,7 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
         //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 1, cv::Scalar(0, 255, 0), cv::FILLED);
         //cv::imshow("Right_Image", right_image);
         //cv::imshow("Left_Image", left_image);
-        if(i == 4)
+        if(true)
         {
             cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 30, cv::Scalar(0, 255, 0), 2);
             cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 30, cv::Scalar(0, 255, 0), 2);
@@ -92,7 +92,8 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
             cv::imshow("Right_Image", right_image);
             cv::imshow("Left_Image", left_image);
 
-            cv::waitKey(0);
+            cv::waitKey(200);
+            //cv::waitKey(0);
         }
 
         //cv::waitKey(0);
@@ -179,12 +180,12 @@ int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::s
         points4D.at<double>(0,0) *= -1; // Because the image is mirrored.
         double d1 = points4D.at<double>(0,0) - ground_truth[i][0];
         double d2 = points4D.at<double>(1,0) - ground_truth[i][1];
+        double d3 = points4D.at<double>(2,0) - ground_truth[i][2];
         double error = std::sqrt(d1*d1 + d2*d2);
         //std::cout << "error: " << error << " --> GT:" << ground_truth[i][0] << "," << ground_truth[i][1] << " _ TRI: " << points4D.at<double>(0,0) << "," << points4D.at<double>(1,0) << std::endl;
         std::cout << error << std::endl;
         datafile << error << "\n";
     }
-
 
     return 0;
 }

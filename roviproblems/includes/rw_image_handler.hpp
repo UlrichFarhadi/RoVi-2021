@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 #include <fstream>
+#include <cmath>
 
 // Robworks includes
 #include <rw/rw.hpp>
@@ -97,59 +98,37 @@ void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr _wc,
 // Function to find feature in both images (2D point to be used for triangulation)
 std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::Mat image_left)
 {
-    // Find center int(mean(x),mean(y)) of the cap (red pixels) of right and left image
-    // Right image:
-    std::vector<int> x_right;
-    std::vector<int> y_right;
-    for (int i = 0; i < image_right.rows; i++)
-    {
-        for (int j = 0; j < image_right.cols; j++)
-        {
-            //std::cout << image_right.at<cv::Vec3b>(i,j) << std::endl;
-            cv::Vec3b color = image_right.at<cv::Vec3b>(i,j);
-            if (color[0] <= 70 && color[1] <= 70 && color[2] >= 150)
-            {
-                y_right.push_back(i);
-                x_right.push_back(j);
-            }
-        }
-    }
-    // Left image:
-    std::vector<int> x_left;
-    std::vector<int> y_left;
-    for (int i = 0; i < image_left.rows; i++)
-    {
-        for (int j = 0; j < image_left.cols; j++)
-        {
-            //std::cout << image_left.at<cv::Vec3b>(i,j) << std::endl;
-            cv::Vec3b color = image_left.at<cv::Vec3b>(i,j);
-            if (color[0] <= 30 && color[1] <= 30 && color[2] >= 220)
-            {
-                y_left.push_back(i);
-                x_left.push_back(j);
-            }
-        }
-    }
-    double x_right_avg = std::accumulate(x_right.begin(), x_right.end(), 0.0) / x_right.size();
-    double y_right_avg = std::accumulate(y_right.begin(), y_right.end(), 0.0) / y_right.size();
-    double x_left_avg = std::accumulate(x_left.begin(), x_left.end(), 0.0) / x_left.size();
-    double y_left_avg = std::accumulate(y_left.begin(), y_left.end(), 0.0) / y_left.size();
+    cv::Mat gray_right;
+    cv::cvtColor(image_right, gray_right, cv::COLOR_BGR2GRAY);
+    cv::medianBlur(gray_right, gray_right, 5);
+    cv::medianBlur(gray_right, gray_right, 5);
+    std::vector<cv::Vec3f> circles_right;
+    cv::HoughCircles(gray_right, circles_right, cv::HOUGH_GRADIENT, 1,
+                 50,  // change this value to detect circles with different distances to each other
+                 40, 10, 1, 40 // change the last two parameters
+            // (min_radius & max_radius) to detect larger circles
+    );
 
-    std::vector<int> right_feature = {std::round(y_right_avg), std::round(x_right_avg)};
-    std::vector<int> left_feature = {std::round(y_left_avg), std::round(x_left_avg)};
+    cv::Mat gray_left;
+    cv::cvtColor(image_left, gray_left, cv::COLOR_BGR2GRAY);
+    cv::medianBlur(gray_left, gray_left, 5);
+    cv::medianBlur(gray_left, gray_left, 5);
+    std::vector<cv::Vec3f> circles_left;
+    cv::HoughCircles(gray_left, circles_left, cv::HOUGH_GRADIENT, 1,
+                 50,  // change this value to detect circles with different distances to each other
+                 40, 10, 1, 40 // change the last two parameters
+            // (min_radius & max_radius) to detect larger circles
+    );
+    cv::Vec3i c_r = circles_right[0];
+    cv::Vec3i c_l = circles_left[0];
 
-    //std::cout << "Right Feature x,y = " << right_feature[0] << "," << right_feature[1] << std::endl;
-    //std::cout << "Left Feature x,y = " << left_feature[0] << "," << left_feature[1] << std::endl;
+    std::cout << c_r[2] << " " << c_l[2] << std::endl;
+    std::vector<int> right_feature = {std::round(c_r[1]), std::round(c_r[0])};
+    std::vector<int> left_feature = {std::round(c_l[1]), std::round(c_l[0])};
 
-    // return a vector of vector2D with the 2D point of right and left feature
+
     std::vector<std::vector<int>> features = {right_feature, left_feature};
     return features;
-}
-
-std::vector<std::vector<double>> triangulateFeatures(std::vector<std::vector<double>> feature2DRightLeft)
-{
-
-    //cv::triangulatePoints();
 }
 
 void storeImages(cv::Mat &img_right, cv::Mat &img_left, std::string image_right, std::string image_left)
@@ -188,9 +167,9 @@ void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
     //std::cout << "Camera properties: fov " << fovy << " width " << width << " height " << height
     //          << std::endl;
 
-    rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Bottle");
+    rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Ball");
     if(NULL == bottleFrame){
-        RW_THROW("COULD not find movable frame Bottle ... check model");
+        RW_THROW("COULD not find movable frame Ball ... check model");
     }
 
     // Ditribution for different bottle spawning points
@@ -199,6 +178,7 @@ void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist_x(-0.35, 0.35);
     std::uniform_real_distribution<double> dist_y(0.36, 0.53);
+    std::uniform_real_distribution<double> dist_z(0.151, 0.232);
 
     State state = wc->getDefaultState();
     
@@ -217,11 +197,12 @@ void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
         {
             double bottlepos_x = dist_x(generator);
             double bottlepos_y = dist_y(generator);
-            std::vector<double> gt_pos = {bottlepos_x, bottlepos_y};
+            double bottlepos_z = dist_z(generator);
+            std::vector<double> gt_pos = {bottlepos_x, bottlepos_y, bottlepos_z};
             ground_truth.push_back(gt_pos);
             //std::cout << i << " Current Bottle Pos" << bottlepos_x << " " << bottlepos_y << std::endl;
             // Moving robot base:
-            rw::math::Vector3D<> bottle_T = rw::math::Vector3D<>(bottlepos_x, bottlepos_y, 0.21);
+            rw::math::Vector3D<> bottle_T = rw::math::Vector3D<>(bottlepos_x, bottlepos_y, bottlepos_z);
             rw::math::RPY<> bottle_R(-90*rw::math::Deg2Rad, 0, 90*rw::math::Deg2Rad);
             rw::math::Transform3D<> bottle_transform(bottle_T, bottle_R);
             bottleFrame->moveTo(bottle_transform, state);

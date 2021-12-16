@@ -1,1 +1,1 @@
-int test(int noise_iterations, int blur_or_saltpepper, double percentage, std::string filename);
+int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename);
