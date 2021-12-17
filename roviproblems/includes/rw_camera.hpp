@@ -15,7 +15,10 @@
 
 #include <rwlibs/simulation/GLFrameGrabber.hpp>
 #include <rwlibs/simulation/SimulatedCamera.hpp>
+
 #include <rwslibs/rwstudioapp/RobWorkStudioApp.hpp>
+
+
 
 // OpenCV Includes
 #include <opencv4/opencv2/opencv.hpp>
@@ -36,6 +39,8 @@ class Camera
     Camera(WorkCell::Ptr wc, std::string camera_name, RobWorkStudio* rwstudio)
     {
         Frame* camera_frame = wc->findFrame(camera_name);
+        if(camera_frame == nullptr)
+            std::cout << "Could not find camera frame" << std::endl;
         const PropertyMap& properties = camera_frame->getPropertyMap();
         const std::string parameters = properties.get< std::string > ("Camera");
         
@@ -47,25 +52,28 @@ class Camera
 
         const SceneViewer::Ptr gldrawer = rwstudio->getView ()->getSceneViewer ();
         const GLFrameGrabber::Ptr framegrabber = ownedPtr (new GLFrameGrabber (width, height, fovy));
-        framegrabber->init (gldrawer);
+        bool is_framegrabber = framegrabber->init (gldrawer);
+        if(!is_framegrabber)
+            std::cout << "Framegravver was not initiated" << std::endl;
         
-        SimulatedCamera::Ptr simcam = ownedPtr (new SimulatedCamera ("SimulatedCamera", fovy, camera_frame, framegrabber));
+        simcam = ownedPtr (new SimulatedCamera ("SimulatedCamera", fovy, camera_frame, framegrabber));
         simcam->setFrameRate(100);
-        simcam->initialize ();
+        bool is_simcam_initiated = simcam->initialize ();
+        if(!is_simcam_initiated)
+            std::cout << "Simcam was not initiated" << std::endl;
     }
 
     void get_image(State state, std::string filename)
     {
-        simcam->start ();
+        simcam->start();
         simcam->acquire ();
+
         double DT = 0.001;
         const Simulator::UpdateInfo info (DT);
-        int cnt = 0;
         const Image* img;
         while (!simcam->isImageReady ()) {
             //std::cout << "Image is not ready yet. Iteration " << cnt << std::endl;
             simcam->update (info, state);
-            cnt++;
         }
         img = simcam->getImage ();    
         img->saveAsPPM (filename + ".ppm");
@@ -90,21 +98,37 @@ void generateImages(WorkCell::Ptr wc, State state)
         RobWorkStudioApp app ("");
         RWS_START(app)
         {
+            std::cout << "App started" << std::endl;
             RobWorkStudio* const rwstudio = app.getRobWorkStudio ();
             //rwstudio->postOpenWorkCell (WC_FILE);
             rwstudio->postWorkCell(wc);
             //rwstudio->
             rwstudio->setState(state);
             TimerUtil::sleepMs (5000);
+            std::cout << "Timer util started" << std::endl;
 
             Camera camera_right(wc, "Camera_Right", rwstudio);
             Camera camera_left(wc, "Camera_Left", rwstudio);
 
             camera_right.get_image(state, "../experiment_data/p4_dense/images/Camera_right");
-            camera_left.get_image(state, "../experiment_data/p4_dense/images/Camera_left");
-
+            camera_left.get_image(state, "../experiment_data/p4_dense/images/Camera_left");            
+            
             app.close ();
         }
         RWS_END ()
     }   
+}
+
+rw::math::Transform3D<> getProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr _wc, State _state) {
+    rw::math::Transform3D<> H;
+    Frame* cameraFrame = _wc->findFrame(frameName);
+    if (cameraFrame != NULL) {
+        if (cameraFrame->getPropertyMap().has("Camera")) {
+            rw::math::Transform3D<> camPosOGL = cameraFrame->wTf(_state);
+            rw::math::Transform3D<> openGLToVis = rw::math::Transform3D<>(rw::math::RPY<>(-1 * rw::math::Pi, 0, rw::math::Pi).toRotation3D());
+            H = inverse(camPosOGL * openGLToVis);
+
+        }
+    }
+    return H;
 }

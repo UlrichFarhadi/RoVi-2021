@@ -20,7 +20,7 @@
     <Property>
      <Name>LastOpennedFiles</Name>
      <Value>
-      <StringList>/home/thobias/Documents/MSc1/RoVi-2021/workCell/Scene.wc.xml;/home/thobias/Documents/MSc1/ROB/Excersises/lec3/ReachabilityAnalysis/scene/Scene.wc.xml;/home/thobias/Documents/MSc1/RoVi-2021/workcell/Scene.wc.xml;/home/thobias/Documents/MSc1/RoVi-2021/Project_WorkCell_Obstacle/Scene.wc.xml</StringList>
+      <StringList>/home/thobias/Documents/MSc1/RoVi-2021/workCell/Scene.wc.xml;/home/thobias/Documents/MSc1/ROB/Excersises/lec3/ReachabilityAnalysis/scene/Scene.wc.xml;/home/thobias/Documents/MSc1/RoVi-2021/Project_WorkCell_Obstacle/Scene.wc.xml;/home/thobias/Documents/MSc1/RoVi-2021/workcell/Scene.wc.xml</StringList>
      </Value>
     </Property>
     <Property>
@@ -242,7 +242,7 @@
     <Property>
      <Name>PreviousOpenDirectory</Name>
      <Value>
-      <String>/home/thobias/Documents/MSc1/RoVi-2021/Project_WorkCell_Obstacle/</String>
+      <String>/home/thobias/Documents/MSc1/RoVi-2021/workcell/</String>
      </Value>
     </Property>
     <Property>
