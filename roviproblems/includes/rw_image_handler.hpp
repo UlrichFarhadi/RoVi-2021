@@ -98,9 +98,37 @@ void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr _wc,
 // Function to find feature in both images (2D point to be used for triangulation)
 std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::Mat image_left)
 {
+    // Thresholding the colours to remove any shadows or light spots from the light source
+    for (int row = 0; row < image_right.rows; row++)
+    {
+        for (int col = 0; col < image_right.cols; col++)
+        {
+            cv::Vec3b & color = image_right.at<cv::Vec3b>(row,col);
+            if (color[0] >= 50 && color[1] <= 20 && color[2] <= 20)
+            {
+                color[0] = 255;
+                color[1] = 0;
+                color[2] = 0;
+            }
+        }
+    }
+    for (int row = 0; row < image_left.rows; row++)
+    {
+        for (int col = 0; col < image_left.cols; col++)
+        {
+            cv::Vec3b & color = image_left.at<cv::Vec3b>(row,col);
+            if (color[0] >= 50 && color[1] <= 20 && color[2] <= 20)
+            {
+                color[0] = 255;
+                color[1] = 0;
+                color[2] = 0;
+            }
+        }
+    }
+    
+
     cv::Mat gray_right;
     cv::cvtColor(image_right, gray_right, cv::COLOR_BGR2GRAY);
-    cv::medianBlur(gray_right, gray_right, 5);
     cv::medianBlur(gray_right, gray_right, 5);
     std::vector<cv::Vec3f> circles_right;
     cv::HoughCircles(gray_right, circles_right, cv::HOUGH_GRADIENT, 1,
@@ -111,7 +139,6 @@ std::vector<std::vector<int>> feature2DRightLeftImage(cv::Mat image_right, cv::M
 
     cv::Mat gray_left;
     cv::cvtColor(image_left, gray_left, cv::COLOR_BGR2GRAY);
-    cv::medianBlur(gray_left, gray_left, 5);
     cv::medianBlur(gray_left, gray_left, 5);
     std::vector<cv::Vec3f> circles_left;
     cv::HoughCircles(gray_left, circles_left, cv::HOUGH_GRADIENT, 1,
@@ -175,7 +202,7 @@ void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
     // Ditribution for different bottle spawning points
     // Upper Left corner: x = 0.35, y = 0.36
     // Upper right corner: x = -0.35, y = 0.53
-    std::default_random_engine generator;
+    std::default_random_engine generator(40);
     std::uniform_real_distribution<double> dist_x(-0.35, 0.35);
     std::uniform_real_distribution<double> dist_y(0.36, 0.53);
     std::uniform_real_distribution<double> dist_z(0.151, 0.232);

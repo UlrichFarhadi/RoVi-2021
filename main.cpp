@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 
 
 
-    triangulationTest(0, 1, 0.0, "NoNoise");
+    //triangulationTest(0, 1, 0.0, "NoNoise");
     //triangulationTest(10, 1, 0.0, "G_10");
     //triangulationTest(20, 1, 0.0, "G_20");
     //triangulationTest(40, 1, 0.0, "G_40");
