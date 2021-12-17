@@ -58,7 +58,7 @@ LINK_DIRECTORIES( ${ROBWORKSTUDIO_LIBRARY_DIRS} )
 
 # Add the source files to build'
 #SET(SrcFiles main.cpp roviproblems/src/p3_2.cpp roviproblems/src/p3_3.cpp roviproblems/src/p4_dense.cpp)
-SET(SrcFiles main.cpp roviproblems/src/p4_dense.cpp)
+SET(SrcFiles main.cpp roviproblems/src/combination.cpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${SrcFiles})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROBWORK_LIBRARIES} ${ROBWORKSTUDIO_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS} Qt5Core Qt5Widgets)

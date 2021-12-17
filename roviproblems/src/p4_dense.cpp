@@ -365,7 +365,7 @@ void dense_stereo(std::string imgL_path, std::string imgR_path, std::string obje
     // Create the filtering object
     pcl::StatisticalOutlierRemoval<pclPoint> sor;
     sor.setInputCloud(pcl_scene_vox);
-    sor.setMeanK(50);
+    sor.setMeanK(10);
     sor.setStddevMulThresh(1);
     sor.filter (*pcl_scene_filtered);
     std::cout << "Filtered. Points remaining " << pcl_scene_filtered->size() << std::endl;

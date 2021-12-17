@@ -1,8 +1,7 @@
 #include <iostream>
 
-#include "roviproblems/includes/p3_2.hpp"
-#include "roviproblems/includes/p3_3.hpp"
-#include "roviproblems/includes/p4_dense.hpp"
+#include "roviproblems/includes/combination.hpp"
+
 //#include "roviproblems/includes/rw_image_handler.hpp"
 
 ////////TEST
@@ -26,19 +25,23 @@
 #include <rw/kinematics/Kinematics.hpp>
 #include <rw/trajectory/Path.hpp>
 
+#include <random>
+#include <iostream>
+
+using namespace std;
+
 
 int main(int argc, char** argv)
 {
-    //pick_n_place_analysis();
-    //simulateCollisionLandscape(20);
-    //std::cout << reachabilityAnalysis_place(0, 0, false, true) << std::endl;
+
     std::cout << "main started" << std::endl;
-    std::vector<std::vector<double>> g;
-    //getImageFromCameras(g);
-    test();
+
+
+
+    testCombined();
 
  
-    //reachabilityAnalysis();  
+
 
     return 0;
 }

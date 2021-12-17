@@ -62,13 +62,13 @@
 <!-- Cameras -->
 
 <Frame name="Camera_Right" refframe="WORLD" type="Movable">
-	<Pos>0.0 1.00 0.7</Pos>
-	<RPY>0 0 -45</RPY>
+	<Pos>-0.13 0.488 1.000</Pos>
+	<RPY>0 0 0</RPY>
 	<Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
 </Frame>
 <Frame name="Camera_Left" refframe="WORLD" type="Movable">
-	<Pos>0.2 1.00 0.7</Pos>
-	<RPY>0 0 -45</RPY>
+	<Pos>0.13 0.488 1.000</Pos>
+	<RPY>0 0 0</RPY>
 	<Property name="Camera" desc="[fovy,width,height]">50 640 480</Property>
 </Frame>
 

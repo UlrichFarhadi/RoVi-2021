@@ -1,8 +1,8 @@
 Info,  T0: this is my info call
-Info,  T0: Load /home/thobias/Documents/MSc1/RoVi-2021/workcell/table/Sigmund_table.obj
+Info,  T0: Load /home/thobias/Documents/MSc1/RoVi-2021/Project_WorkCell_Obstacle/table/Sigmund_table.obj
 Debug, T0: Assimp 5.0.0 amd64 gcc debug shared singlethreaded
 Info,  T0: Found a matching importer for this file format: Wavefront Object Importer.
-Info,  T0: Import root directory is '/home/thobias/Documents/MSc1/RoVi-2021/workcell/table/'
+Info,  T0: Import root directory is '/home/thobias/Documents/MSc1/RoVi-2021/Project_WorkCell_Obstacle/table/'
 Debug, T0: UpdateImporterScale scale set: %f1
 Warn,  T0: ScenePreprocessor: UVs are declared to be 3D but they're obviously not. Reverting to 2D.
 Skipping one or more lines with the same contents

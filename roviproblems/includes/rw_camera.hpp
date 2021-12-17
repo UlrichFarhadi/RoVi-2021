@@ -63,7 +63,7 @@ class Camera
             std::cout << "Simcam was not initiated" << std::endl;
     }
 
-    void get_image(State state, std::string filename)
+    void get_image(State &state, std::string filename)
     {
         simcam->start();
         simcam->acquire ();
@@ -84,15 +84,9 @@ class Camera
     SimulatedCamera::Ptr simcam;
 };
 
-void ppmToMat(cv::Mat &img_right, cv::Mat &img_left, std::string image_right, std::string image_left)
-{
-    cv::Mat img_right_file = cv::imread(image_right);
-    cv::Mat img_left_file = cv::imread(image_left);
-    img_right_file.cv::Mat::copyTo(img_right);
-    img_left_file.cv::Mat::copyTo(img_left);
-}
 
-void generateImages(WorkCell::Ptr wc, State state)
+
+void generateImages(WorkCell::Ptr wc, State &state)
 {
     {
         RobWorkStudioApp app ("");
@@ -110,8 +104,8 @@ void generateImages(WorkCell::Ptr wc, State state)
             Camera camera_right(wc, "Camera_Right", rwstudio);
             Camera camera_left(wc, "Camera_Left", rwstudio);
 
-            camera_right.get_image(state, "../experiment_data/p4_dense/images/Camera_right");
-            camera_left.get_image(state, "../experiment_data/p4_dense/images/Camera_left");            
+            camera_right.get_image(state, "../experiment_data/combination/images/Camera_right");
+            camera_left.get_image(state, "../experiment_data/combination/images/Camera_left");            
             
             app.close ();
         }
