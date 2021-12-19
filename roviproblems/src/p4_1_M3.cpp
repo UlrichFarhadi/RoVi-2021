@@ -180,7 +180,9 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         double d1 = points4D.at<double>(0,0) - ground_truth[i][0];
         double d2 = points4D.at<double>(1,0) - ground_truth[i][1];
         double d3 = points4D.at<double>(2,0) - ground_truth[i][2];
-        double error = std::sqrt(d1*d1 + d2*d2 + d3*d3);
+        //double error = std::sqrt(d1*d1 + d2*d2 + d3*d3); // Euclidean error
+        double error = (d1+d2+d3)/3.0; // Average error
+        //double error = std::sqrt((d1*d1)/3.0 + (d2*d2)/3.0 + (d3*d3)/3.0); // RMSE error
         std::cout << "error: " << error << " _ " << d1 << "," << d2 << "," << d3 << std::endl;
         //std::cout << "error: " << error << " --> GT:" << ground_truth[i][0] << "," << ground_truth[i][1] << "," << ground_truth[i][2] << " _ TRI: " << points4D.at<double>(0,0) << "," << points4D.at<double>(1,0) << "," << points4D.at<double>(2,0) << std::endl;
         //std::cout << error << std::endl;
