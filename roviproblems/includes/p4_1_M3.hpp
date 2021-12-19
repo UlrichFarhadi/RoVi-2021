@@ -1,1 +1,2 @@
-int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename);
+int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename, std::vector<std::vector<double>> ground_truth, rw::models::WorkCell::Ptr wc, rw::kinematics::State state);
+std::vector<std::vector<double>> saveTestImages();

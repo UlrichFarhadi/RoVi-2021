@@ -56,7 +56,7 @@ INCLUDE_DIRECTORIES( ${ROBWORKSTUDIO_INCLUDE_DIRS} )
 LINK_DIRECTORIES( ${ROBWORKSTUDIO_LIBRARY_DIRS} )
 
 # Add the source files to build'
-SET(SrcFiles main.cpp roviproblems/src/p4_1_M3.cpp)
+SET(SrcFiles main.cpp roviproblems/src/p4_1_M3.cpp roviproblems/src/p3_2.cpp)
 
 
 

@@ -53,16 +53,16 @@ std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std
 }
 
 
-int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay)
+int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay, rw::models::WorkCell::Ptr wc)
 {
     std::cout << "Running reachability analysis..." << std::endl;
     
         //load workcell
-        std::cout << "Loading workcell..." << std::endl;
-        rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
-        if(NULL == wc){
-            RW_THROW("COULD NOT LOAD scene... check path!");
-        }
+        // std::cout << "Loading workcell..." << std::endl;
+        // rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene_ball.wc.xml");
+        // if(NULL == wc){
+        //     RW_THROW("COULD NOT LOAD scene... check path!");
+        // }
 
         // find relevant frames
         /*
@@ -72,9 +72,9 @@ int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay
         }
         */
 
-        rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Bottle");
-        if(NULL == bottleFrame){
-            RW_THROW("COULD not find movable frame Bottle ... check model");
+        rw::kinematics::MovableFrame::Ptr ballFrame = wc->findFrame<rw::kinematics::MovableFrame>("Ball");
+        if(NULL == ballFrame){
+            RW_THROW("COULD not find movable frame Ball ... check model");
         }
 
         rw::kinematics::MovableFrame::Ptr URReferenceFrame = wc->findFrame<rw::kinematics::MovableFrame>("URReference");
@@ -125,7 +125,7 @@ int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay
         std::string target;
         if (side)
         {
-            target = "Bottle";
+            target = "Ball";
         }
         else
         {
@@ -135,7 +135,7 @@ int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay
         for (double rollAngle = 0.0; rollAngle < 360.0; rollAngle += 1.0)
         {
             // First set the cylinderFrame
-            rw::math::Vector3D<> t(bottleFrame->getTransform(state).P());
+            rw::math::Vector3D<> t(ballFrame->getTransform(state).P());
 
             // Notes:
             // Euler ZYX Convention --> Rotation about z0 of angle alpha + Rotation about y1 of angle beta + Rotation about x2 of angle gamma
@@ -143,13 +143,13 @@ int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay
             //      - Rotation about x0 of angle gamma + Rotation about y0 of angle beta + Rotation about z0 of angle alpha
             //      - roll = Rotation around z, pitch = Rotation around y, yaw = Rotation around x
             // Summary --> Roll Pitch Yaw XYZ (g,b,a) <=> Euler ZYX (a,b,g)
-            // In our example the bottle rotates around its y axis, so in RPY angles that is the pitch (aka rotation around y)
+            // In our example the Ball rotates around its y axis, so in RPY angles that is the pitch (aka rotation around y)
             //      BUT! It has also been rotated in respect to the world frame which needs to be accounted for:
-            //          The bottle has been rotated 90 degrees about the x axis and -90 degrees about the z axis, in reference to the world frame
+            //          The Ball has been rotated 90 degrees about the x axis and -90 degrees about the z axis, in reference to the world frame
             //              The -90 can be omitted in the roll equation since it has to go 360 degrees around it anyways
             rw::math::RPY<> R(rollAngle*rw::math::Deg2Rad, 0, 90*rw::math::Deg2Rad);
-            rw::math::Transform3D<> newBottleTransform(t, R);
-            bottleFrame->moveTo(newBottleTransform, state);
+            rw::math::Transform3D<> newBallTransform(t, R);
+            ballFrame->moveTo(newBallTransform, state);
 
             std::vector<rw::math::Q> solutions = getConfigurations(target, toolTCP, robotUR685A, wc, state);
 
@@ -190,14 +190,14 @@ int reachabilityAnalysis_pick(double x_pos, double y_pos, bool side, bool replay
 
 }
 
-int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool replay)
+int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool replay, rw::models::WorkCell::Ptr wc)
 {
     
         //load workcell
-        rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
-        if(NULL == wc){
-            RW_THROW("COULD NOT LOAD scene... check path!");
-        }
+        // rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene_ball.wc.xml");
+        // if(NULL == wc){
+        //     RW_THROW("COULD NOT LOAD scene... check path!");
+        // }
 
         // find relevant frames
         /*
@@ -207,9 +207,9 @@ int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool repla
         }
         */
 
-        rw::kinematics::MovableFrame::Ptr bottleFrame = wc->findFrame<rw::kinematics::MovableFrame>("Bottle");
-        if(NULL == bottleFrame){
-            RW_THROW("COULD not find movable frame Bottle ... check model");
+        rw::kinematics::MovableFrame::Ptr ballFrame = wc->findFrame<rw::kinematics::MovableFrame>("Ball");
+        if(NULL == ballFrame){
+            RW_THROW("COULD not find movable frame Ball ... check model");
         }
 
         rw::kinematics::MovableFrame::Ptr URReferenceFrame = wc->findFrame<rw::kinematics::MovableFrame>("URReference");
@@ -259,12 +259,12 @@ int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool repla
         std::string toolTCP = wsg50->getName() + "." + "TCP";
         //std::cout << "toolTCP: " << toolTCP << std::endl;
 
-        rw::math::Vector3D<> T_place = Vector3D<>(0.285, -0.490, 0.21);
+        rw::math::Vector3D<> T_place = Vector3D<>(0.285, -0.490, 0.151);
 
         std::string target;
         if (side)
         {
-            target = "Bottle";
+            target = "Ball";
         }
         else
         {
@@ -274,11 +274,11 @@ int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool repla
         for (double rollAngle = 0.0; rollAngle < 360.0; rollAngle += 1.0)
         {
             // First set the cylinderFrame
-            //rw::math::Vector3D<> t(bottleFrame->getTransform(state).P());
+            //rw::math::Vector3D<> t(ballFrame->getTransform(state).P());
             rw::math::RPY<> R(rollAngle*rw::math::Deg2Rad, 0, 90*rw::math::Deg2Rad);
-            rw::math::Transform3D<> newBottleTransform(T_place, R);
-            //std::cout << bottleFrame->getTransform(state) << std::endl;
-            bottleFrame->moveTo(newBottleTransform, state);
+            rw::math::Transform3D<> newBallTransform(T_place, R);
+            //std::cout << ballFrame->getTransform(state) << std::endl;
+            ballFrame->moveTo(newBallTransform, state);
 
             
             std::vector<rw::math::Q> solutions = getConfigurations(target, toolTCP, robotUR685A, wc, state);
@@ -321,7 +321,7 @@ int reachabilityAnalysis_place(double x_pos, double y_pos, bool side, bool repla
 
 }
 
-void simulateCollisionLandscape(int N)
+void simulateCollisionLandscape(int N, rw::models::WorkCell::Ptr wc)
 {
     // Make N uniformly distributed base positions of the robot
     // Test both the Pick and Place position
@@ -377,8 +377,8 @@ void simulateCollisionLandscape(int N)
     {
         std::cout << i << " out of " << xy_positions.size()-1 << std::endl;
         //std::cout << reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1]) << std::endl;
-        pick_solutions_side.push_back(reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1], true, false));
-        place_solutions_side.push_back(reachabilityAnalysis_place(xy_positions[i][0], xy_positions[i][1], true, false));
+        pick_solutions_side.push_back(reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1], true, false, wc));
+        place_solutions_side.push_back(reachabilityAnalysis_place(xy_positions[i][0], xy_positions[i][1], true, false, wc));
     }
     
     std::ofstream data_file_side_combined("../experiment_data/p3_2/combined_collision_landscape_SIDE.csv");
@@ -412,8 +412,8 @@ void simulateCollisionLandscape(int N)
     {
         std::cout << i << " out of " << xy_positions.size()-1 << std::endl;
         //std::cout << reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1]) << std::endl;
-        pick_solutions_top.push_back(reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1], false, false));
-        place_solutions_top.push_back(reachabilityAnalysis_place(xy_positions[i][0], xy_positions[i][1], false, false));
+        pick_solutions_top.push_back(reachabilityAnalysis_pick(xy_positions[i][0], xy_positions[i][1], false, false, wc));
+        place_solutions_top.push_back(reachabilityAnalysis_place(xy_positions[i][0], xy_positions[i][1], false, false, wc));
     }
 
     

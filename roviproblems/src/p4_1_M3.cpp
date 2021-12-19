@@ -25,18 +25,24 @@
 #include "../includes/p4_1_M3.hpp"
 #include "../includes/rw_image_handler.hpp"
 
-
-int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename) // Blur = 1, salt and pepper = 2
+std::vector<std::vector<double>> saveTestImages()
 {
-    
     std::vector<std::vector<double>> ground_truth;
-    // Generate 20 images that are going to be used for testing (Only needs to be done 1 time)
     getImageFromCameras(ground_truth);
+    return ground_truth;
+}
+
+int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, std::string filename, std::vector<std::vector<double>> ground_truth, rw::models::WorkCell::Ptr wc, rw::kinematics::State state) // Blur = 1, salt and pepper = 2
+{
 
     //std::cout << "Ground Truth for: " << ground_truth[2][0] << " , " << ground_truth[2][1] << std::endl;
 
     std::string filename_combined = "../experiment_data/p4_1_M3/" + filename + ".csv";
-    std::ofstream datafile(filename_combined);
+    std::string filename_binary = "../experiment_data/p4_1_M3/" + filename + "_binary" + ".csv";
+    std::ofstream datafile;
+    std::ofstream datafilebinary;
+    datafile.open(filename_combined, std::ios_base::app);
+    datafilebinary.open(filename_binary, std::ios_base::app);
     for(int i = 0; i < 20; i++)
     {
         std::cout << "Image: " << i << std::endl;
@@ -46,7 +52,7 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         std::string i_l_str = "ImageLeft" + std::to_string(i) + ".ppm";
         storeImages(right_image, left_image, i_r_str, i_l_str);
 
-        if(blur_or_saltpepper == 1)
+        if(blur_or_saltpepper == 1 || blur_or_saltpepper == 0)
         {
             for (int j = 0; j < noise_iterations; j++)
             {
@@ -55,7 +61,7 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
             }
         }
 
-        if(blur_or_saltpepper == 2)
+        if(blur_or_saltpepper == 2  || blur_or_saltpepper == 0)
         {
             addSaltAndPepperNoise(right_image, salt_and_pepper_percentage);
             addSaltAndPepperNoise(left_image, salt_and_pepper_percentage);
@@ -89,30 +95,22 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
             //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 30, cv::Scalar(0, 255, 0), 2);
             cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
             cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
-            cv::imshow("Right_Image", right_image);
-            cv::imshow("Left_Image", left_image);
+            //cv::imshow("Right_Image", right_image);
+            //cv::imshow("Left_Image", left_image);
 
             //cv::waitKey(200);
-            cv::waitKey(0);
+            //cv::waitKey(0);
         }
 
         //cv::waitKey(0);
 
-        //load workcell
-        //std::cout << "Loading workcell..." << std::endl;
-        rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
-        if(NULL == wc){
-            RW_THROW("COULD NOT LOAD scene... check path!");
-        }
-        // get the default state
-        State state = wc->getDefaultState();
         rw::kinematics::Frame* frame_world = wc->findFrame("Table");
         rw::kinematics::Frame* frame_camera_right = wc->findFrame("Camera_Right");
         rw::kinematics::Frame* frame_camera_left = wc->findFrame("Camera_Left");
-
         //printProjectionMatrix("Camera_Right", wc, state);
         //printProjectionMatrix("Camera_Left", wc, state);
 
+        // Calculate the camera parameters (Formulas from RoViSamplePlugin)
         rw::math::Transform3D<> camPosOGL_r = frame_camera_right->wTf(state);
         rw::math::Transform3D<> openGLToVis_r = rw::math::Transform3D<>(rw::math::RPY<>(-1 * rw::math::Pi, 0, rw::math::Pi).toRotation3D());
         rw::math::Transform3D<> camera_right_extrinsics = rw::math::inverse(camPosOGL_r * rw::math::inverse(openGLToVis_r));
@@ -137,6 +135,7 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         int width_right;
         int height_right;
         iss_right >> fovy_right >> width_right >> height_right;
+        // Calculate the camera focal length (Formulas from RoViSamplePlugin)
         double fovy_pixel = height_right / 2.0 / std::tan(fovy_right * (2*M_PI) / 360.0 / 2.0 );
 
         //std::cout << "fov: " << fovy_pixel << std::endl;
@@ -185,8 +184,18 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         std::cout << "error: " << error << " _ " << d1 << "," << d2 << "," << d3 << std::endl;
         //std::cout << "error: " << error << " --> GT:" << ground_truth[i][0] << "," << ground_truth[i][1] << "," << ground_truth[i][2] << " _ TRI: " << points4D.at<double>(0,0) << "," << points4D.at<double>(1,0) << "," << points4D.at<double>(2,0) << std::endl;
         //std::cout << error << std::endl;
-        datafile << error << "\n";
+        datafile << error << ",";
+        if(d1 <= 0.01 && d2 <= 0.01 && d3 <= 0.01)
+        {
+            datafilebinary << 1 << ",";
+        }
+        else
+        {
+            datafilebinary << 0 << ",";
+        }
     }
+    datafile << "\n";
+    datafilebinary << "\n";
 
     return 0;
 }

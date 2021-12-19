@@ -1,3 +1,6 @@
+#ifndef RW_IMAGE_HANDLER_H
+#define RW_IMAGE_HANDLER_H
+
 // std includes
 #include <iostream>
 #include <string>
@@ -170,7 +173,7 @@ void storeImages(cv::Mat &img_right, cv::Mat &img_left, std::string image_right,
 void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
 {
     {
-    static const std::string WC_FILE = "../workcell/Scene.wc.xml";
+    static const std::string WC_FILE = "../workcell/Scene_ball.wc.xml";
     const WorkCell::Ptr wc = WorkCellLoader::Factory::load (WC_FILE);
     if (wc.isNull ())
         RW_THROW ("WorkCell could not be loaded.");
@@ -310,3 +313,8 @@ void getImageFromCameras(std::vector<std::vector<double>> &ground_truth)
     }
     std::cout << "Images Loaded" << std::endl;
 }
+
+
+
+
+#endif
