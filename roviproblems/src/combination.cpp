@@ -479,7 +479,27 @@ void testCombined()
     }
 
     
+    /*
     std::vector<std::vector<double>> gt = saveTestImages();
+
+    std::ofstream ground_truth_file("../experiment_data/combination/images/images.csv");
+    for (int i = 0; i < 20; i++)
+    {
+        ground_truth_file << gt[i][0] << "," << gt[i][1] << "," << gt[i][2] << "\n";
+    }
+    */
+
+   std::vector<std::vector<double>> gt;
+   std::vector<double> vec1 = {-0.166942, 0.418821, 0.212428};
+   std::vector<double> vec2 = {-0.241788, 0.425912, 0.213909};
+   std::vector<double> vec3 = {-0.0819809, 0.391961, 0.175942};
+   std::vector<double> vec4 = {0.121583, 0.440054, 0.168614};
+   std::vector<double> vec5 = {-0.295994, 0.386649, 0.154858};
+   gt.push_back(vec1);
+   gt.push_back(vec2);
+   gt.push_back(vec3);
+   gt.push_back(vec4);
+   gt.push_back(vec5);
 
     for(int i = 0; i < 20; i++)
     {
