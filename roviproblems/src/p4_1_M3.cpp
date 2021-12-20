@@ -56,8 +56,8 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         {
             for (int j = 0; j < noise_iterations; j++)
             {
-                cv::blur(right_image, right_image, cv::Size(3, 3));
-                cv::blur(left_image, left_image, cv::Size(3, 3));
+                cv::GaussianBlur(right_image, right_image, cv::Size(3, 3), 0);
+                cv::GaussianBlur(left_image, left_image, cv::Size(3, 3), 0);
             }
         }
 

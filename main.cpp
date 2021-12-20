@@ -54,8 +54,11 @@ int main(int argc, char** argv)
 
     //--------------------- P4_1_M3 ----------------------//
     // Generate 20 images that are going to be used for testing
-    std::vector<std::vector<double>> ground_truth = saveTestImages();
+    //std::vector<std::vector<double>> ground_truth = saveTestImages();
     //triangulationTest(150, 1, 0.0, "ImageTest", ground_truth, wc, state);
+    //triangulationTest(0, 2, 25.0, "ImageTest", ground_truth, wc, state);
+    //triangulationTest(0, 2, 50.0, "ImageTest", ground_truth, wc, state);
+
     // Run tests
 
     // Blur Tests
