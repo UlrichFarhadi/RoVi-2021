@@ -471,16 +471,6 @@ void testCombined()
     WorkCell::Ptr wc = WorkCellLoader::Factory::load(scene_path);
     State state = wc->getDefaultState();
 
-    std::random_device rd;  // non-deterministic generator
-    std::mt19937 gen(rd()); // to seed mersenne twister.
-
-    std::default_random_engine generator(gen());
-    std::uniform_real_distribution<double> dist_x(-0.35, 0.35);
-    std::uniform_real_distribution<double> dist_y(0.36, 0.53);
-    std::uniform_real_distribution<double> dist_z(0.151, 0.232);
-    std::uniform_real_distribution<double> r_dist(0, 90);
-    std::uniform_real_distribution<double> p_dist(0, 90);
-    std::uniform_real_distribution<double> y_dist(0, 90);
 
     rw::kinematics::MovableFrame::Ptr ballFrame = wc->findFrame<rw::kinematics::MovableFrame>("Ball");
     if(NULL == ballFrame){
@@ -490,42 +480,24 @@ void testCombined()
     for(int i = 0; i < 5; i++)
     {
         trial += i;
-        double pos_x = dist_x(generator);
-        double pos_y = dist_y(generator);
-        double pos_z = dist_z(generator);
-        double r_pos = dist_x(generator);
-        double p_pos = dist_y(generator);
-        double y_pos = dist_z(generator);
         
         // Moving robot base:
-        rw::math::Vector3D<> bottle_T = rw::math::Vector3D<>(pos_x, pos_y, pos_z);
-        rw::math::RPY<> bottle_R(r_pos*rw::math::Deg2Rad, p_pos*rw::math::Deg2Rad, y_pos*rw::math::Deg2Rad);
-        rw::math::Transform3D<> bottle_transform(bottle_T, bottle_R);
+        ////GROUND TRUTH
         ballFrame->moveTo(bottle_transform, state);
-        
-        std::cout << "Capturing images..." << std::endl;
-        generateImages(wc, state);
-        cv::waitKey(10000); // Wait 10 seconds to make sure the application closes
-        std::cout << "Images captured" << std::endl;
 
         // Save the images as cv::Mat objects
         cv::Mat img_right = cv::imread("../experiment_data/combination/images/Camera_right.ppm");
         cv::Mat img_left = cv::imread("../experiment_data/combination/images/Camera_left.ppm");
-        std::cout << "Images loaded to OpenCV structures" << std::endl;
-        std::cout << "img_right dims: " << img_right.cols << "x" << img_right.rows << std::endl;
-        std::cout << "img_left dims: " << img_left.cols << "x" << img_left.rows << std::endl;
 
         // Get estimated pose of the 3D object in world coordinates by triangulating features in the left and right images
         // Camera parameters are automatically calculated from the information in the workcell
         // Noise can be added here as Gaussian blur or Black and white Salt and Pepper.
         rw::math::Transform3D<> triangulatedObjectPose = rwTriangulatePoints(img_right, img_left, 0, 0, 0.0);
-        std::cout << "Object pose computed" << std::endl;
-
-        std::cout << triangulatedObjectPose << std::endl;
 
         // Do motion planning with RRT to create a path from the object to the place position.
-        std::cout << "Starting motion planning" << std::endl;
         motion_planning_RRT(scene_path, robot_device_name, state, triangulatedObjectPose, map, trial);
+
+        
 
     }
     
