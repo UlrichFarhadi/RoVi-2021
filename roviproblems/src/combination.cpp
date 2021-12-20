@@ -32,12 +32,13 @@
 // RoVi includes
 #include "../includes/rw_image_handler.hpp"
 #include "../includes/rw_camera.hpp"
+#include "../includes/generate_images.hpp"
 
 
 USE_ROBWORK_NAMESPACE
 using namespace robwork;
 
-rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image_left, int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage)
+rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image_left, int noise_iterations, int blur_or_saltpepper, double salt_and_pepper_percentage, WorkCell::Ptr wc)
 {
     cv::Mat right_image;
     cv::Mat left_image;
@@ -61,7 +62,7 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
 
     std::vector<std::vector<int>> RL_features = feature2DRightLeftImage(right_image, left_image);
 
-    if(true)
+    if(false)
     {
         cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
         cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
@@ -71,21 +72,19 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
         //cv::waitKey(200);
         cv::waitKey(0);
     }
-
+    std::cout << "Loading workcell" << std::endl;
     //cv::waitKey(0);
 
     //load workcell
     //std::cout << "Loading workcell..." << std::endl;
-    rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load("../workcell/Scene.wc.xml");
-    if(NULL == wc){
-        RW_THROW("COULD NOT LOAD scene... check path!");
-    }
+
+    std::cout << "WOrkcell loaded" << std::endl;
     // get the default state
     State state = wc->getDefaultState();
     rw::kinematics::Frame* frame_world = wc->findFrame("Table");
     rw::kinematics::Frame* frame_camera_right = wc->findFrame("Camera_Right");
     rw::kinematics::Frame* frame_camera_left = wc->findFrame("Camera_Left");
-
+    std::cout << "Getting parameters" << std::endl;
     // Calculate the camera parameters (Formulas from RoViSamplePlugin)
     rw::math::Transform3D<> camPosOGL_r = frame_camera_right->wTf(state);
     rw::math::Transform3D<> openGLToVis_r = rw::math::Transform3D<>(rw::math::RPY<>(-1 * rw::math::Pi, 0, rw::math::Pi).toRotation3D());
@@ -93,7 +92,7 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
     rw::math::Transform3D<> camPosOGL_l = frame_camera_left->wTf(state);
     rw::math::Transform3D<> openGLToVis_l = rw::math::Transform3D<>(rw::math::RPY<>(-1 * rw::math::Pi, 0, rw::math::Pi).toRotation3D());
     rw::math::Transform3D<> camera_left_extrinsics = rw::math::inverse(camPosOGL_l * rw::math::inverse(openGLToVis_l));
-
+    std::cout << "Camera parameters gotten" << std::endl;
     // Calculate the focal length
     rw::kinematics::Frame* const camera_right= wc->findFrame ("Camera_Right");
     if (camera_right == nullptr)
@@ -108,7 +107,7 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
     int height_right;
     iss_right >> fovy_right >> width_right >> height_right;
     double fovy_pixel = height_right / 2.0 / std::tan(fovy_right * (2*M_PI) / 360.0 / 2.0 );
-
+    
     // Cal
     Eigen::Matrix<double, 3, 4> camera_intrinsics;
     camera_intrinsics << fovy_pixel, 0, width_right / 2.0, 0,
@@ -117,7 +116,7 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
 
     Eigen::Matrix<double, 3, 4> P_camera_right = camera_intrinsics * camera_right_extrinsics.e();
     Eigen::Matrix<double, 3, 4> P_camera_left = camera_intrinsics * camera_left_extrinsics.e();
-
+    std::cout << "Calculated projection matrix" << std::endl;
     // Triangulate
     cv::Mat P_mat_R;
     cv::Mat P_mat_L;
@@ -132,7 +131,9 @@ rw::math::Transform3D<> rwTriangulatePoints(cv::Mat &image_right, cv::Mat &image
     points_left.at<double>(0,0) = RL_features[1][1];
     points_left.at<double>(1,0) = RL_features[1][0];
 
+    std::cout << "triangulating points" << std::endl;
     cv::triangulatePoints(P_mat_R, P_mat_L, points_left, points_right, points4D);
+    std::cout << "triangulated points" << std::endl;
     points4D = points4D / points4D.at<double>(3,0);
     //std::cout << points4D << std::endl;
     points4D.at<double>(0,0) *= -1; // Because the image is mirrored.
@@ -477,27 +478,29 @@ void testCombined()
         RW_THROW("COULD not find movable frame Ball ... check model");
     }
 
-    for(int i = 0; i < 5; i++)
+    
+    std::vector<std::vector<double>> gt = saveTestImages();
+
+    for(int i = 0; i < 20; i++)
     {
-        trial += i;
+        trial = i;
         
         // Moving robot base:
         ////GROUND TRUTH
-        ballFrame->moveTo(bottle_transform, state);
+        Transform3D<> ground_truth(Vector3D<>(gt[i][0],gt[i][1],gt[i][2]), RPY<>(0,0,0));
+        ballFrame->moveTo(ground_truth, state);
 
         // Save the images as cv::Mat objects
-        cv::Mat img_right = cv::imread("../experiment_data/combination/images/Camera_right.ppm");
-        cv::Mat img_left = cv::imread("../experiment_data/combination/images/Camera_left.ppm");
+        cv::Mat img_right = cv::imread("../experiment_data/combination/images/ImageRight" + std::to_string(i) + ".ppm");
+        cv::Mat img_left = cv::imread("../experiment_data/combination/images/ImageLeft" + std::to_string(i) + ".ppm");
 
         // Get estimated pose of the 3D object in world coordinates by triangulating features in the left and right images
         // Camera parameters are automatically calculated from the information in the workcell
         // Noise can be added here as Gaussian blur or Black and white Salt and Pepper.
-        rw::math::Transform3D<> triangulatedObjectPose = rwTriangulatePoints(img_right, img_left, 0, 0, 0.0);
-
+        rw::math::Transform3D<> triangulatedObjectPose = rwTriangulatePoints(img_right, img_left, 0, 0, 0.0, wc);
+        std::cout << "Triangulated pose found" << std::endl;
         // Do motion planning with RRT to create a path from the object to the place position.
         motion_planning_RRT(scene_path, robot_device_name, state, triangulatedObjectPose, map, trial);
-
-        
 
     }
     
