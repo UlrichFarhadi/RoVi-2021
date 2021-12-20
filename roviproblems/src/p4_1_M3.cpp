@@ -89,17 +89,17 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 1, cv::Scalar(0, 255, 0), cv::FILLED);
         //cv::imshow("Right_Image", right_image);
         //cv::imshow("Left_Image", left_image);
-        if(true)
+        if(false)
         {
             //cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 30, cv::Scalar(0, 255, 0), 2);
             //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 30, cv::Scalar(0, 255, 0), 2);
             cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
             cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 2, cv::Scalar(0, 255, 0), cv::FILLED);
-            //cv::imshow("Right_Image", right_image);
-            //cv::imshow("Left_Image", left_image);
+            cv::imshow("Right_Image", right_image);
+            cv::imshow("Left_Image", left_image);
 
             //cv::waitKey(200);
-            //cv::waitKey(0);
+            cv::waitKey(0);
         }
 
         //cv::waitKey(0);
@@ -181,7 +181,7 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         double d2 = points4D.at<double>(1,0) - ground_truth[i][1];
         double d3 = points4D.at<double>(2,0) - ground_truth[i][2];
         //double error = std::sqrt(d1*d1 + d2*d2 + d3*d3); // Euclidean error
-        double error = (d1+d2+d3)/3.0; // Average error
+        double error = (std::abs(d1)+std::abs(d2)+std::abs(d3))/3.0; // Average error
         //double error = std::sqrt((d1*d1)/3.0 + (d2*d2)/3.0 + (d3*d3)/3.0); // RMSE error
         std::cout << "error: " << error << " _ " << d1 << "," << d2 << "," << d3 << std::endl;
         //std::cout << "error: " << error << " --> GT:" << ground_truth[i][0] << "," << ground_truth[i][1] << "," << ground_truth[i][2] << " _ TRI: " << points4D.at<double>(0,0) << "," << points4D.at<double>(1,0) << "," << points4D.at<double>(2,0) << std::endl;

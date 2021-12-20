@@ -55,35 +55,35 @@ int main(int argc, char** argv)
     //--------------------- P4_1_M3 ----------------------//
     // Generate 20 images that are going to be used for testing
     std::vector<std::vector<double>> ground_truth = saveTestImages();
-    
+    //triangulationTest(150, 1, 0.0, "ImageTest", ground_truth, wc, state);
     // Run tests
 
     // Blur Tests
-    
-    for (int i = 0; i <= 200; i++) // Increasing the amount of times an average kernel of 3x3 is used on the image
+    /*
+    for (int i = 0; i <= 150; i++) // Increasing the amount of times an average kernel of 3x3 is used on the image
     {
-        std::cout << i << " Out Of: " << 200 << std::endl;
+        std::cout << i << " Out Of: " << 150 << std::endl;
         triangulationTest(i, 1, 0.0, "BlurTest", ground_truth, wc, state);
     }
-    
+    */
 
     // Salt and Pepper (black and white) Tests
-    
+    /*
     for (int i = 0; i <= 100; i++) // Increasing the percentage of Salt and Pepper noise
     {
         std::cout << i << " Out Of: " << 100 << std::endl;
         triangulationTest(0, 2, i, "SPTest", ground_truth, wc, state);
     }
-    
+    */
 
     // Blur and Salt and Pepper (black and white) Tests
-    
+    /*
     for (int i = 0; i <= 100; i+=2) // Increasing the percentage of Salt and Pepper noise
     {
         std::cout << i << " Out Of: " << 100 << std::endl;
         triangulationTest(i, 0, i, "BlurSPTest", ground_truth, wc, state);
     }
-    
+    */
 
     //----------------------------------------------------//
 
