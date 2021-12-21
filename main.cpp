@@ -23,7 +23,6 @@
 
 // RoVi includes
 #include "roviproblems/includes/p3_2.hpp"
-#include "roviproblems/includes/p3_3.hpp"
 #include "roviproblems/includes/p4_1_M3.hpp"
 
 std::string project_path = "../";

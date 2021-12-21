@@ -89,7 +89,7 @@ int triangulationTest(int noise_iterations, int blur_or_saltpepper, double salt_
         //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 1, cv::Scalar(0, 255, 0), cv::FILLED);
         //cv::imshow("Right_Image", right_image);
         //cv::imshow("Left_Image", left_image);
-        if(true)
+        if(false)
         {
             //cv::circle(right_image, cv::Point(RL_features[0][1], RL_features[0][0]), 30, cv::Scalar(0, 255, 0), 2);
             //cv::circle(left_image, cv::Point(RL_features[1][1], RL_features[1][0]), 30, cv::Scalar(0, 255, 0), 2);
