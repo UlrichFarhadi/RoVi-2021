@@ -41,8 +41,8 @@ SET(RobWorkStudio_DIR ${RWSTUDIO_ROOT}/cmake)
 
 
 #FIND_PACKAGE(RobWork REQUIRED HINTS ~/RobWork)
-FIND_PACKAGE(RobWork REQUIRED HINTS /home/ulrich/RobWork)
-FIND_PACKAGE(RobWorkStudio REQUIRED HINTS /home/ulrich/RobWork/RobWorkStudio)
+FIND_PACKAGE(RobWork REQUIRED HINTS ~/RobWork)
+FIND_PACKAGE(RobWorkStudio REQUIRED HINTS HINTS ~/RobWorkStudio)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package( OpenCV REQUIRED )
